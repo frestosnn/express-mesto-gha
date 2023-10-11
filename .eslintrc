@@ -1,6 +1,6 @@
 {
-    "extends": "airbnb-base",
-    "allowAfterThisConstructor": true,
-    "enforceInMethodNames": true,
-    "enforceInClassFields": true
+  "extends": "airbnb-base",
+  "allowAfterThisConstructor": true,
+  "enforceInMethodNames": true,
+  "enforceInClassFields": true
 }
