@@ -11,6 +11,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 //через localhost не получается подключиться, первая ссылка с решением проблемы со StackOverflow
 mongoose.connect("mongodb://127.0.0.1:27017/mestodb");
 
+//создание для каждой карточки владельца с одним ID
 app.use((req, res, next) => {
   req.user = {
     _id: "6526724bbf06121c53305df4",
