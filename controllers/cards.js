@@ -1,17 +1,11 @@
 const Card = require("../models/card");
 
-const handleErrors = (err, res) => {
-  if (err.name === "ValidationError") {
-    return res.status(400).send({ message: "Переданы некорректные данные." });
-  } else {
-    return res.status(500).send({ message: "Произошла ошибка" });
-  }
-};
-
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch((err) => handleErrors(err, res));
+    .catch((err) => {
+      return res.status(500).send({ message: "Server Error" });
+    });
 };
 
 module.exports.createCard = (req, res) => {
@@ -20,7 +14,12 @@ module.exports.createCard = (req, res) => {
 
   Card.create({ name, link, owner })
     .then((card) => res.send(card))
-    .catch((err) => handleErrors(err, res));
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return res.status(400).send({ message: err.message });
+      }
+      return res.status(500).send({ message: "Server Error" });
+    });
 };
 
 module.exports.deleteCard = (req, res) => {
@@ -30,10 +29,15 @@ module.exports.deleteCard = (req, res) => {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
-
-      res.send(card);
+      res.status(200).send(card);
     })
-    .catch((err) => handleErrors(err, res));
+    .catch((err) => {
+      console.log(err);
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Invalid ID" });
+      }
+      return res.status(500).send({ message: "Server Error" });
+    });
 };
 
 module.exports.likeCard = (req, res) => {
@@ -47,10 +51,15 @@ module.exports.likeCard = (req, res) => {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
-
-      res.send(card);
+      res.status(200).send(card);
     })
-    .catch((err) => handleErrors(err, res));
+    .catch((err) => {
+      console.log(err);
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Invalid ID" });
+      }
+      return res.status(500).send({ message: "Server Error" });
+    });
 };
 
 module.exports.dislikeCard = (req, res) => {
@@ -65,8 +74,13 @@ module.exports.dislikeCard = (req, res) => {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
-
-      res.send(card);
+      res.status(200).send(card);
     })
-    .catch((err) => handleErrors(err, res));
+    .catch((err) => {
+      console.log(err);
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Invalid ID" });
+      }
+      return res.status(500).send({ message: "Server Error" });
+    });
 };
