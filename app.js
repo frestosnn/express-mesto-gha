@@ -26,6 +26,16 @@ app.use((req, res, next) => {
 app.use("/users", require("./routes/users.js"));
 app.use("/cards", require("./routes/cards.js"));
 
+app.use((req, res, next) => {
+  const err = new Error("Not Found: Маршрут не найден");
+  err.status = 404;
+  next(err);
+});
+
+app.use((err, req, res, next) => {
+  res.status(err.status).send({ message: err.message });
+});
+
 app.listen(PORT, () => {
   console.log(`App is listening ${PORT}`);
 });
