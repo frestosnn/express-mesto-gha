@@ -1,25 +1,24 @@
 const User = require("../models/user");
 
-const handleErrors = (err, res) => {
-  if (err.name === "ValidationError") {
-    return res.status(400).send({ message: "Переданы некорректные данные." });
-  } else {
-    return res.status(500).send({ message: "Произошла ошибка" });
-  }
-};
-
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.send(users))
-    .catch((err) => handleErrors(err, res));
+    .then((users) => res.status(201).send(users))
+    .catch((err) => {
+      return res.status(500).send({ message: "Server Error" });
+    });
 };
 
 module.exports.createUser = (req, res) => {
   const { name, about, avatar } = req.body;
 
   User.create({ name, about, avatar })
-    .then((user) => res.send(user))
-    .catch((err) => handleErrors(err, res));
+    .then((user) => res.status(201).send(user))
+    .catch((err) => {
+      if (err.name === "ValidationError") {
+        return res.status(400).send({ message: err.message });
+      }
+      return res.status(500).send({ message: "Server Error" });
+    });
 };
 
 module.exports.getUser = (req, res) => {
@@ -33,7 +32,13 @@ module.exports.getUser = (req, res) => {
 
       res.send(user);
     })
-    .catch((err) => handleErrors(err, res));
+    .catch((err) => {
+      console.log(err);
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Invalid ID" });
+      }
+      return res.status(500).send({ message: "Server Error" });
+    });
 };
 
 module.exports.updateUser = (req, res) => {

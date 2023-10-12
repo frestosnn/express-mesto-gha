@@ -26,7 +26,7 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
-      if (!card[req.params.cardId]) {
+      if (!card) {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
@@ -37,20 +37,13 @@ module.exports.deleteCard = (req, res) => {
 };
 
 module.exports.likeCard = (req, res) => {
-  const owner = req.user._id;
-
   Card.findByIdAndUpdate(
     req.params.cardId,
-
-    // добавить _id в массив, если его там нет
-    { $addToSet: { likes: owner } },
-    {
-      new: true,
-      runValidators: true,
-    }
+    { $addToSet: { likes: req.user._id } },
+    { new: true }
   )
     .then((card) => {
-      if (!card[req.params.cardId]) {
+      if (!card) {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
@@ -61,22 +54,19 @@ module.exports.likeCard = (req, res) => {
 };
 
 module.exports.dislikeCard = (req, res) => {
-  const owner = req.user._id;
-
   Card.findByIdAndUpdate(
     req.params.cardId,
 
-    // добавить _id в массив, если его там нет
-    { $pull: { likes: owner } },
-    { new: true, runValidators: true }
+    { $pull: { likes: req.user._id } },
+    { new: true }
   )
     .then((card) => {
-      if (!card[req.params.cardId]) {
+      if (!card) {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
 
-      res.status(200).send(card);
+      res.send(card);
     })
     .catch((err) => handleErrors(err, res));
 };
