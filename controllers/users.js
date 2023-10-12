@@ -26,9 +26,11 @@ module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
 
     .then((user) => {
-      if (!user) {
-        return res.status(404).send({ message: "Пользователь не найден" });
+      if (!user[req.params.userId]) {
+        res.status(404).send({ message: "Пользователь не найден" });
+        return;
       }
+
       res.send(user);
     })
     .catch((err) => handleErrors(err, res));
@@ -38,12 +40,19 @@ module.exports.updateUser = (req, res) => {
   const { name, about } = req.body;
   const owner = req.user._id;
 
-  User.findByIdAndUpdate(owner, { name: name, about: about })
+  User.findByIdAndUpdate(
+    owner,
+    { name: name, about: about },
+    {
+      new: true,
+      runValidators: true,
+    }
+  )
     .then((user) => {
-      if (!user) {
-        return res.status(404).send({ message: "Пользователь не найден" });
+      if (!user[req.params.userId]) {
+        res.status(404).send({ message: "Пользователь не найден" });
+        return;
       }
-      res.send(user);
     })
     .catch((err) => handleErrors(err, res));
 };
@@ -52,12 +61,19 @@ module.exports.updateUserAvatar = (req, res) => {
   const { avatar } = req.body;
   const owner = req.user._id;
 
-  User.findByIdAndUpdate(owner, { avatar: avatar })
+  User.findByIdAndUpdate(
+    owner,
+    { avatar: avatar },
+    {
+      new: true,
+      runValidators: true,
+    }
+  )
     .then((user) => {
-      if (!user) {
-        return res.status(404).send({ message: "Пользователь не найден" });
+      if (!user[req.params.userId]) {
+        res.status(404).send({ message: "Пользователь не найден" });
+        return;
       }
-      res.send(user);
     })
     .catch((err) => handleErrors(err, res));
 };

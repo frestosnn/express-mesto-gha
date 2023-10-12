@@ -26,10 +26,10 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.cardId)
     .then((card) => {
-      if (!card) {
-        return res.status(404).send({ message: "Карточка не найдена" });
+      if (!card[req.params.cardId]) {
+        res.status(404).send({ message: "Пользователь не найден" });
+        return;
       }
-      res.send(card);
     })
     .catch((err) => handleErrors(err, res));
 };
@@ -41,13 +41,17 @@ module.exports.likeCard = (req, res) => {
     req.params.cardId,
 
     // добавить _id в массив, если его там нет
-    { $addToSet: { likes: owner } }
+    { $addToSet: { likes: owner } },
+    {
+      new: true,
+      runValidators: true,
+    }
   )
     .then((card) => {
-      if (!card) {
-        return res.status(404).send({ message: "Карточка не найдена" });
+      if (!card[req.params.cardId]) {
+        res.status(404).send({ message: "Пользователь не найден" });
+        return;
       }
-      res.send(card);
     })
     .catch((err) => handleErrors(err, res));
 };
@@ -60,13 +64,13 @@ module.exports.dislikeCard = (req, res) => {
 
     // добавить _id в массив, если его там нет
     { $pull: { likes: owner } },
-    { new: true }
+    { new: true, runValidators: true }
   )
     .then((card) => {
-      if (!card) {
-        return res.status(404).send({ message: "Карточка не найдена" });
+      if (!card[req.params.cardId]) {
+        res.status(404).send({ message: "Пользователь не найден" });
+        return;
       }
-      res.send(card);
     })
     .catch((err) => handleErrors(err, res));
 };
