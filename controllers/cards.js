@@ -4,7 +4,7 @@ module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send(cards))
     .catch((err) => {
-      return res.status(500).send({ message: err.message });
+      return res.status(500).send({ message: "На сервере произошла ошибка" });
     });
 };
 
@@ -20,7 +20,7 @@ module.exports.createCard = (req, res) => {
           message: "Переданы некорректные данные при создании карточки.",
         });
       }
-      return res.status(500).send({ message: err.message });
+      return res.status(500).send({ message: "На сервере произошла ошибка" });
     });
 };
 
@@ -41,7 +41,7 @@ module.exports.deleteCard = (req, res) => {
           message: "Переданы некорректные данные при обновлении профиля.",
         });
       }
-      return res.status(500).send({ message: err.message });
+      return res.status(500).send({ message: "На сервере произошла ошибка" });
     });
 };
 
@@ -65,7 +65,7 @@ module.exports.likeCard = (req, res) => {
           message: "Переданы некорректные данные для постановки лайка",
         });
       }
-      return res.status(500).send({ message: err.message });
+      return res.status(500).send({ message: "На сервере произошла ошибка" });
     });
 };
 
@@ -90,6 +90,6 @@ module.exports.dislikeCard = (req, res) => {
           .status(400)
           .send({ message: "Переданы некорректные данные для снятия лайка" });
       }
-      return res.status(500).send({ message: err.message });
+      return res.status(500).send({ message: "На сервере произошла ошибка" });
     });
 };
