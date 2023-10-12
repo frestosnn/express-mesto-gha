@@ -37,12 +37,11 @@ module.exports.getUser = (req, res) => {
 };
 
 module.exports.updateUser = (req, res) => {
-  const { name, about } = req.body;
   const owner = req.user._id;
 
   User.findByIdAndUpdate(
     owner,
-    { name: name, about: about },
+    { name: req.body.name, about: req.body.about },
     {
       new: true,
       runValidators: true,
@@ -53,17 +52,17 @@ module.exports.updateUser = (req, res) => {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
+      res.send(user);
     })
     .catch((err) => handleErrors(err, res));
 };
 
 module.exports.updateUserAvatar = (req, res) => {
-  const { avatar } = req.body;
   const owner = req.user._id;
 
   User.findByIdAndUpdate(
     owner,
-    { avatar: avatar },
+    { avatar: req.body.avatar },
     {
       new: true,
       runValidators: true,
@@ -74,6 +73,7 @@ module.exports.updateUserAvatar = (req, res) => {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
+      res.send(user);
     })
     .catch((err) => handleErrors(err, res));
 };

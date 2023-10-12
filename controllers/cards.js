@@ -30,6 +30,8 @@ module.exports.deleteCard = (req, res) => {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
+
+      res.send(card);
     })
     .catch((err) => handleErrors(err, res));
 };
@@ -52,6 +54,8 @@ module.exports.likeCard = (req, res) => {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
+
+      res.send(card);
     })
     .catch((err) => handleErrors(err, res));
 };
@@ -71,6 +75,8 @@ module.exports.dislikeCard = (req, res) => {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
+
+      res.send(card);
     })
     .catch((err) => handleErrors(err, res));
 };
