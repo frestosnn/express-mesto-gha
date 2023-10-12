@@ -59,7 +59,14 @@ module.exports.updateUser = (req, res) => {
       }
       res.status(200).send(user);
     })
-    .catch((err) => handleErrors(err, res));
+
+    .catch((err) => {
+      console.log(err);
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Invalid ID" });
+      }
+      return res.status(500).send({ message: "Server Error" });
+    });
 };
 
 module.exports.updateUserAvatar = (req, res) => {
@@ -80,5 +87,12 @@ module.exports.updateUserAvatar = (req, res) => {
       }
       res.status(200).send(user);
     })
-    .catch((err) => handleErrors(err, res));
+
+    .catch((err) => {
+      console.log(err);
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Invalid ID" });
+      }
+      return res.status(500).send({ message: "Server Error" });
+    });
 };
