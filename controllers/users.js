@@ -26,7 +26,7 @@ module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
 
     .then((user) => {
-      if (!user[req.params.userId]) {
+      if (!user) {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
@@ -48,7 +48,7 @@ module.exports.updateUser = (req, res) => {
     }
   )
     .then((user) => {
-      if (!user[req.params.userId]) {
+      if (!user) {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
@@ -69,7 +69,7 @@ module.exports.updateUserAvatar = (req, res) => {
     }
   )
     .then((user) => {
-      if (!user[req.params.userId]) {
+      if (!user) {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
