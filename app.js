@@ -26,6 +26,11 @@ app.use((req, res, next) => {
 app.use("/users", require("./routes/users.js"));
 app.use("/cards", require("./routes/cards.js"));
 
+//обработка неправильных путей
+app.use((req, res) => {
+  res.status(404).send("Обработка неправильного пути");
+});
+
 app.listen(PORT, () => {
   console.log(`App is listening ${PORT}`);
 });
