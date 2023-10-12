@@ -76,7 +76,7 @@ module.exports.dislikeCard = (req, res) => {
         return;
       }
 
-      res.send(card);
+      res.status(200).send(card);
     })
     .catch((err) => handleErrors(err, res));
 };
