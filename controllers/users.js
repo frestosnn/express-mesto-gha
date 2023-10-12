@@ -2,7 +2,7 @@ const User = require("../models/user");
 
 module.exports.getUsers = (req, res) => {
   User.find({})
-    .then((users) => res.status(201).send(users))
+    .then((users) => res.status(200).send(users))
     .catch((err) => {
       return res.status(500).send({ message: "Server Error" });
     });
@@ -29,9 +29,9 @@ module.exports.getUser = (req, res) => {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
-
-      res.send(user);
+      res.status(200).send(user);
     })
+
     .catch((err) => {
       console.log(err);
       if (err.name === "CastError") {
@@ -57,7 +57,7 @@ module.exports.updateUser = (req, res) => {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
-      res.send(user);
+      res.status(200).send(user);
     })
     .catch((err) => handleErrors(err, res));
 };
@@ -78,7 +78,7 @@ module.exports.updateUserAvatar = (req, res) => {
         res.status(404).send({ message: "Пользователь не найден" });
         return;
       }
-      res.send(user);
+      res.status(200).send(user);
     })
     .catch((err) => handleErrors(err, res));
 };
