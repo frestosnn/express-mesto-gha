@@ -37,6 +37,9 @@ module.exports.getUser = (req, res) => {
     })
 
     .catch((err) => {
+      if (err.name === "CastError") {
+        return res.status(400).send({ message: "Invalid ID" });
+      }
       return res.status(500).send({ message: err.message });
     });
 };
