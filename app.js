@@ -27,8 +27,8 @@ app.use("/users", require("./routes/users.js"));
 app.use("/cards", require("./routes/cards.js"));
 
 //обработка неправильных путей
-app.use((req, res) => {
-  res.status(404).send("Обработка неправильного пути");
+app.use((req, res, err) => {
+  res.status(404).send({ message: err.message });
 });
 
 app.listen(PORT, () => {
