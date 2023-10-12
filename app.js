@@ -20,16 +20,17 @@ app.use((req, res, next) => {
     _id: "6526724bbf06121c53305df4",
   };
 
+  err.status = 404;
+  next(err);
+});
+
+app.use((err, req, res, next) => {
+  res.status(err.status).send({ message: err.message });
   next();
 });
 
 app.use("/users", require("./routes/users.js"));
 app.use("/cards", require("./routes/cards.js"));
-
-//обработка неправильных путей
-app.use((req, res, err) => {
-  res.status(404).send({ message: err.message });
-});
 
 app.listen(PORT, () => {
   console.log(`App is listening ${PORT}`);
