@@ -4,7 +4,7 @@ module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send(users))
     .catch((err) => {
-      return res.status(500).send({ message: "Server Error" });
+      return res.status(500).send({ message: err.message });
     });
 };
 
@@ -15,9 +15,13 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.status(200).send(user))
     .catch((err) => {
       if (err.name === "ValidationError") {
-        return res.status(400).send({ message: err.message });
+        return res
+          .status(400)
+          .send({
+            message: "Переданы некорректные данные при создании пользователя.",
+          });
       }
-      return res.status(500).send({ message: "Server Error" });
+      return res.status(500).send({ message: err.message });
     });
 };
 
@@ -26,18 +30,16 @@ module.exports.getUser = (req, res) => {
 
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: "Пользователь не найден" });
+        res
+          .status(404)
+          .send({ message: "Пользователь по указанному _id не найден." });
         return;
       }
       res.status(200).send(user);
     })
 
     .catch((err) => {
-      console.log(err);
-      if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid ID" });
-      }
-      return res.status(500).send({ message: "Server Error" });
+      return res.status(500).send({ message: err.message });
     });
 };
 
@@ -54,7 +56,9 @@ module.exports.updateUser = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: "Пользователь не найден" });
+        res
+          .status(404)
+          .send({ message: "Пользователь с указанным _id не найден." });
         return;
       }
       res.status(200).send(user);
@@ -63,9 +67,11 @@ module.exports.updateUser = (req, res) => {
     .catch((err) => {
       console.log(err);
       if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid ID" });
+        return res.status(400).send({
+          message: "Переданы некорректные данные при обновлении профиля.",
+        });
       }
-      return res.status(500).send({ message: "Server Error" });
+      return res.status(500).send({ message: err.message });
     });
 };
 
@@ -82,7 +88,9 @@ module.exports.updateUserAvatar = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        res.status(404).send({ message: "Пользователь не найден" });
+        res
+          .status(404)
+          .send({ message: "Пользователь с указанным _id не найден." });
         return;
       }
       res.status(200).send(user);
@@ -91,8 +99,10 @@ module.exports.updateUserAvatar = (req, res) => {
     .catch((err) => {
       console.log(err);
       if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid ID" });
+        return res.status(400).send({
+          message: "Переданы некорректные данные при обновлении аватара. ",
+        });
       }
-      return res.status(500).send({ message: "Server Error" });
+      return res.status(500).send({ message: err.message });
     });
 };
