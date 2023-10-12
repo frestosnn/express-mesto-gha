@@ -20,12 +20,6 @@ app.use((req, res, next) => {
     _id: "6526724bbf06121c53305df4",
   };
 
-  err.status = 404;
-  next(err);
-});
-
-app.use((err, req, res, next) => {
-  res.status(err.status).send({ message: err.message });
   next();
 });
 
