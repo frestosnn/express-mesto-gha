@@ -36,7 +36,7 @@ module.exports.deleteCard = (req, res) => {
       res.status(200).send(card);
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === "ValidationError" || err.name === "CastError") {
         return res.status(400).send({
           message: "Переданы некорректные данные при обновлении профиля.",
         });
