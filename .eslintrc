@@ -1,6 +1,6 @@
 {
   "extends": "airbnb-base",
-  "allowAfterThisConstructor": true,
-  "enforceInMethodNames": true,
-  "enforceInClassFields": true
+  "rules": {
+    "no-underscore-dangle": ["error", { "allow": ["_id"] }]
+  }
 }
