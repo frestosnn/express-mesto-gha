@@ -1,56 +1,62 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const User = require("../models/user");
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const User = require('../models/user');
 
-const { JWT_SECRET = "secret" } = process.env;
+const { JWT_SECRET = 'secret' } = process.env;
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.status(200).send(users))
-    .catch(() =>
-      res.status(500).send({ message: "На сервере произошла ошибка" })
-    );
+    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
 };
 
 module.exports.createUser = (req, res) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
 
-  //хэшируем пароль
+  // хэшируем пароль
   bcrypt
     .hash(password, 10)
-    .then((hash) => User.create({ name, about, avatar, email, password: hash }))
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
     .then((user) => res.status(201).send(user))
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res.status(400).send({
-          message: "Переданы некорректные данные при создании пользователя.",
+          message: 'Переданы некорректные данные при создании пользователя.',
         });
       }
       if (err.code === 11000) {
         return res
           .status(409)
-          .send({ message: "Такой пользователь уже создан" });
+          .send({ message: 'Такой пользователь уже создан' });
       }
-      return res.status(500).send({ message: "На сервере произошла ошибка" });
+      return res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
 module.exports.getUser = (req, res) => {
   User.findById(req.params.userId)
-    .orFail(new Error("InvalidId"))
+    .orFail(new Error('InvalidId'))
     .then((user) => {
       res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.name === "CastError") {
-        return res.status(400).send({ message: "Invalid ID" });
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Invalid ID' });
       }
-      if (err.message === "InvalidId") {
+      if (err.message === 'InvalidId') {
         res
           .status(404)
-          .send({ message: "Пользователь по указанному _id не найден." });
+          .send({ message: 'Пользователь по указанному _id не найден.' });
       }
-      return res.status(500).send({ message: "На сервере произошла ошибка" });
+      return res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -63,25 +69,25 @@ module.exports.updateUser = (req, res) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   )
-    .orFail(new Error("InvalidId"))
+    .orFail(new Error('InvalidId'))
     .then((user) => {
       res.status(200).send(user);
     })
 
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res.status(400).send({
-          message: "Переданы некорректные данные при обновлении профиля.",
+          message: 'Переданы некорректные данные при обновлении профиля.',
         });
       }
-      if (err.message === "InvalidId") {
+      if (err.message === 'InvalidId') {
         res
           .status(404)
-          .send({ message: "Пользователь по указанному _id не найден." });
+          .send({ message: 'Пользователь по указанному _id не найден.' });
       }
-      return res.status(500).send({ message: "На сервере произошла ошибка" });
+      return res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -94,58 +100,59 @@ module.exports.updateUserAvatar = (req, res) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   )
-    .orFail(new Error("InvalidId"))
+    .orFail(new Error('InvalidId'))
     .then((user) => {
       res.status(200).send(user);
     })
 
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res.status(400).send({
-          message: "Переданы некорректные данные при обновлении аватара. ",
+          message: 'Переданы некорректные данные при обновлении аватара. ',
         });
       }
-      if (err.message === "InvalidId") {
+      if (err.message === 'InvalidId') {
         res
           .status(404)
-          .send({ message: "Пользователь по указанному _id не найден." });
+          .send({ message: 'Пользователь по указанному _id не найден.' });
       }
-      return res.status(500).send({ message: "На сервере произошла ошибка" });
+      return res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
-  if (!email || !password)
-    return res.status(400).send({ message: "Email или пароль не заполнены" });
 
   User.findOne({ email })
-    .orFail(new Error("InvalidData"))
+    .orFail(new Error('InvalidData'))
     .then((user) => {
-      if (!user) {
-        return res
-          .status(403)
-          .send({ message: "Такого пользователя не существует" });
-      }
-      bcrypt.compare(password, user.password, function (err, matched) {
+      bcrypt.compare(password, user.password, (err, matched) => {
         if (!matched) {
-          return res
-            .status(401)
-            .send({ message: "Пароль или email не верный" });
+          res.status(401).send({ message: 'Пароль или email не верный' });
         }
 
-        //генерируем токен пользователя
+        // генерируем токен пользователя
         const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-          expiresIn: "7d",
+          expiresIn: '7d',
         });
 
-        //отдаем пользователю токен
+        // отдаем пользователю токен
         return res.status(200).send(token);
       });
     })
     .catch((err) => {
-      return res.status(500).send({ message: "На сервере произошла ошибка" });
+      if (err.message === 'InvalidData') {
+        res.status(403).send({ message: 'Такого пользователя не существует' });
+      }
+
+      if (!email || !password) {
+        return res
+          .status(400)
+          .send({ message: 'Email или пароль не заполнены' });
+      }
+
+      return res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
