@@ -130,7 +130,9 @@ module.exports.login = (req, res) => {
     .then((user) => {
       bcrypt.compare(password, user.password, (err, matched) => {
         if (!matched) {
-          res.status(401).send({ message: 'Пароль или email не верный' });
+          return res
+            .status(401)
+            .send({ message: 'Пароль или email не верный' });
         }
 
         // генерируем токен пользователя
@@ -139,7 +141,7 @@ module.exports.login = (req, res) => {
         });
 
         // отдаем пользователю токен
-        return res.status(200).send(token);
+        return res.status(200).send({ token });
       });
     })
     .catch((err) => {
