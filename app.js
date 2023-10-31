@@ -4,8 +4,10 @@ const helmet = require('helmet');
 const { celebrate, Joi } = require('celebrate');
 const { errors } = require('celebrate');
 const { createUser, login } = require('./controllers/users');
+
+const userRouter = require('./routes/users');
+const cardRouter = require('./routes/cards');
 require('dotenv').config();
-const auth = require('./middlewares/auth');
 
 const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 const app = express();
@@ -33,11 +35,10 @@ app.post(
   createUser,
 );
 
-app.use(auth);
+app.use('/users', userRouter);
+app.use('/cards', cardRouter);
 
-app.use('/users', require('./routes/users'));
-app.use('/cards', require('./routes/cards'));
-
+// обработка ошибок celebrate
 app.use(errors());
 
 app.use((req, res, next) => {

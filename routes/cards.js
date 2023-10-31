@@ -7,10 +7,12 @@ const {
   likeCard,
   dislikeCard,
 } = require('../controllers/cards');
+const auth = require('../middlewares/auth');
 
-router.get('/', getCards);
+router.get('/', auth, getCards);
 router.post(
   '/',
+  auth,
   celebrate({
     body: Joi.object().keys({
       likes: Joi.array(),
@@ -22,8 +24,8 @@ router.post(
   }),
   createCard,
 );
-router.delete('/:cardId', deleteCard);
-router.put('/:cardId/likes', likeCard);
-router.delete('/:cardId/likes', dislikeCard);
+router.delete('/:cardId', auth, deleteCard);
+router.put('/:cardId/likes', auth, likeCard);
+router.delete('/:cardId/likes', auth, dislikeCard);
 
 module.exports = router;
