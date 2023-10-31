@@ -18,10 +18,6 @@ app.disable('x-powered-by');
 // через localhost не получается подключиться, первая ссылка с решением проблемы со StackOverflow
 mongoose.connect(DB_URL);
 
-app.get('/', (req, res) => {
-  res.send('Hello, world!');
-});
-
 app.post('/signin', login);
 app.post(
   '/signup',
