@@ -1,11 +1,9 @@
-const Card = require("../models/card");
+const Card = require('../models/card');
 
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send(cards))
-    .catch(() =>
-      res.status(500).send({ message: "На сервере произошла ошибка" })
-    );
+    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -15,39 +13,39 @@ module.exports.createCard = (req, res) => {
   Card.create({ name, link, owner })
     .then((card) => res.status(201).send(card))
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res.status(400).send({
-          message: "Переданы некорректные данные при создании карточки.",
+          message: 'Переданы некорректные данные при создании карточки.',
         });
       }
-      return res.status(500).send({ message: "На сервере произошла ошибка" });
+      return res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
 module.exports.deleteCard = (req, res) => {
   const userId = req.user._id;
-  const cardId = req.params.cardId;
+  const { cardId } = req.params;
 
   Card.findByIdAndRemove(cardId)
-    .orFail(new Error("InvalidId"))
+    .orFail(new Error('InvalidId'))
     .then((card) => {
       if (card.owner._id !== userId) {
-        return res.status(403).send({ message: "Отсутствуют права" });
+        return res.status(403).send({ message: 'Отсутствуют права' });
       }
       return res.status(200).send(card);
     })
     .catch((err) => {
-      if (err.name === "ValidationError" || err.name === "CastError") {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         return res.status(400).send({
-          message: "Переданы некорректные данные при обновлении профиля.",
+          message: 'Переданы некорректные данные при обновлении профиля.',
         });
       }
-      if (err.message === "InvalidId") {
+      if (err.message === 'InvalidId') {
         res
           .status(404)
-          .send({ message: "Карточка по указанному _id не найдена." });
+          .send({ message: 'Карточка по указанному _id не найдена.' });
       }
-      return res.status(500).send({ message: "На сервере произошла ошибка" });
+      return res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -55,26 +53,26 @@ module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
-    { new: true }
+    { new: true },
   )
-    .orFail(new Error("InvalidId"))
+    .orFail(new Error('InvalidId'))
     .then((card) => {
       res.status(200).send(card);
     })
     .catch((err) => {
       console.log(err);
-      if (err.name === "ValidationError" || err.name === "CastError") {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         return res.status(400).send({
-          message: "Переданы некорректные данные для постановки лайка",
+          message: 'Переданы некорректные данные для постановки лайка',
         });
       }
 
-      if (err.message === "InvalidId") {
+      if (err.message === 'InvalidId') {
         res
           .status(404)
-          .send({ message: "Карточка по указанному _id не найдена." });
+          .send({ message: 'Карточка по указанному _id не найдена.' });
       }
-      return res.status(500).send({ message: "На сервере произошла ошибка" });
+      return res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
@@ -83,24 +81,24 @@ module.exports.dislikeCard = (req, res) => {
     req.params.cardId,
 
     { $pull: { likes: req.user._id } },
-    { new: true }
+    { new: true },
   )
-    .orFail(new Error("InvalidId"))
+    .orFail(new Error('InvalidId'))
     .then((card) => {
       res.status(200).send(card);
     })
     .catch((err) => {
       console.log(err);
-      if (err.name === "ValidationError" || err.name === "CastError") {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         return res
           .status(400)
-          .send({ message: "Переданы некорректные данные для снятия лайка" });
+          .send({ message: 'Переданы некорректные данные для снятия лайка' });
       }
-      if (err.message === "InvalidId") {
+      if (err.message === 'InvalidId') {
         res
           .status(404)
-          .send({ message: "Карточка по указанному _id не найдена." });
+          .send({ message: 'Карточка по указанному _id не найдена.' });
       }
-      return res.status(500).send({ message: "На сервере произошла ошибка" });
+      return res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
