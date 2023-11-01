@@ -20,14 +20,17 @@ app.disable('x-powered-by');
 // через localhost не получается подключиться, первая ссылка с решением проблемы со StackOverflow
 mongoose.connect(DB_URL);
 
+// обработка ошибок celebrate
+app.use(errors());
+
 app.post('/signin', login);
 app.post(
   '/signup',
   celebrate({
     body: Joi.object().keys({
-      name: Joi.string().required().min(2).max(30),
-      about: Joi.string().required().min(2).max(30),
-      avatar: Joi.string().required(),
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(30),
+      avatar: Joi.string(),
       email: Joi.string().required().email(),
       password: Joi.string().required().min(8),
     }),
@@ -37,9 +40,6 @@ app.post(
 
 app.use('/users', userRouter);
 app.use('/cards', cardRouter);
-
-// обработка ошибок celebrate
-app.use(errors());
 
 app.use((req, res, next) => {
   const err = new Error('Not Found: Маршрут не найден');

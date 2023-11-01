@@ -126,6 +126,7 @@ module.exports.login = (req, res) => {
   const { email, password } = req.body;
 
   User.findOne({ email })
+    .select('+password')
     .orFail(new Error('InvalidData'))
     .then((user) => {
       bcrypt.compare(password, user.password, (err, matched) => {
@@ -157,4 +158,13 @@ module.exports.login = (req, res) => {
 
       return res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
+};
+
+module.exports.getOwner = (req, res) => {
+  const currentUser = req.user;
+  if (currentUser) {
+    res.status(200).send({ currentUser });
+  } else {
+    res.status(500).send({ message: 'На сервере произошла ошибка' });
+  }
 };

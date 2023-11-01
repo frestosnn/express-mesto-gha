@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { celebrate, Joi } = require('celebrate');
+const { celebrate, Joi, Segments } = require('celebrate');
 const {
   getCards,
   createCard,
@@ -10,6 +10,7 @@ const {
 const auth = require('../middlewares/auth');
 
 router.get('/', auth, getCards);
+
 router.post(
   '/',
   auth,
@@ -24,8 +25,38 @@ router.post(
   }),
   createCard,
 );
-router.delete('/:cardId', auth, deleteCard);
-router.put('/:cardId/likes', auth, likeCard);
-router.delete('/:cardId/likes', auth, dislikeCard);
+
+router.delete(
+  '/:cardId',
+  auth,
+  celebrate({
+    [Segments.PARAMS]: {
+      cardId: Joi.string().hex().length(24).required(),
+    },
+  }),
+  deleteCard,
+);
+
+router.put(
+  '/:cardId/likes',
+  auth,
+  celebrate({
+    [Segments.PARAMS]: {
+      cardId: Joi.string().hex().length(24).required(),
+    },
+  }),
+  likeCard,
+);
+
+router.delete(
+  '/:cardId/likes',
+  auth,
+  celebrate({
+    [Segments.PARAMS]: {
+      cardId: Joi.string().hex().length(24).required(),
+    },
+  }),
+  dislikeCard,
+);
 
 module.exports = router;

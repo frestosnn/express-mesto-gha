@@ -23,10 +23,15 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
+  const userId = req.user._id;
+
   Card.findByIdAndRemove(req.params.cardId)
     .orFail(new Error('InvalidId'))
     .then((card) => {
-      res.status(200).send(card);
+      if (card.owner !== userId) {
+        return res.status(403).send({ message: 'Отсутствуют права' });
+      }
+      return res.status(200).send(card);
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
