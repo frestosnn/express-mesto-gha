@@ -27,7 +27,7 @@ module.exports.createUser = (req, res) => {
         password: hash,
       })
     )
-    .then((user) => res.status(201).send(user.select("-password")))
+    .then((user) => res.status(201).send(user))
     .catch((err) => {
       if (err.name === "ValidationError") {
         return res.status(400).send({
@@ -124,6 +124,14 @@ module.exports.updateUserAvatar = (req, res) => {
     });
 };
 
+module.exports.getOwner = (req, res) => {
+  const currentUser = req.user;
+  if (currentUser) {
+    return res.status(200).send({ currentUser });
+  }
+  return res.status(500).send({ message: "На сервере произошла ошибка" });
+};
+
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
 
@@ -160,12 +168,4 @@ module.exports.login = (req, res) => {
 
       return res.status(500).send({ message: "На сервере произошла ошибка" });
     });
-};
-
-module.exports.getOwner = (req, res) => {
-  const currentUser = req.user;
-  if (currentUser) {
-    return res.status(200).send({ currentUser });
-  }
-  return res.status(500).send({ message: "На сервере произошла ошибка" });
 };
