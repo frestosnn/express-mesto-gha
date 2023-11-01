@@ -125,7 +125,11 @@ module.exports.updateUserAvatar = (req, res) => {
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
 
-  User.findOne({ email })
+  if (!email || !password) {
+    return res.status(400).send({ message: 'Email или пароль не заполнены' });
+  }
+
+  return User.findOne({ email })
     .select('+password')
     .orFail(new Error('InvalidData'))
     .then((user) => {
@@ -147,13 +151,9 @@ module.exports.login = (req, res) => {
     })
     .catch((err) => {
       if (err.message === 'InvalidData') {
-        res.status(403).send({ message: 'Такого пользователя не существует' });
-      }
-
-      if (!email || !password) {
         return res
-          .status(400)
-          .send({ message: 'Email или пароль не заполнены' });
+          .status(401)
+          .send({ message: 'Такого пользователя не существует' });
       }
 
       return res.status(500).send({ message: 'На сервере произошла ошибка' });
@@ -163,8 +163,7 @@ module.exports.login = (req, res) => {
 module.exports.getOwner = (req, res) => {
   const currentUser = req.user;
   if (currentUser) {
-    res.status(200).send({ currentUser });
-  } else {
-    res.status(500).send({ message: 'На сервере произошла ошибка' });
+    return res.status(200).send({ currentUser });
   }
+  return res.status(500).send({ message: 'На сервере произошла ошибка' });
 };
