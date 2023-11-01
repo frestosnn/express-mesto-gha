@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { celebrate, Joi, Segments } = require('celebrate');
+const { celebrate, Joi } = require('celebrate');
 const {
   getCards,
   createCard,
@@ -30,9 +30,9 @@ router.delete(
   '/:cardId',
   auth,
   celebrate({
-    [Segments.PARAMS]: {
-      cardId: Joi.string().hex().length(24).required(),
-    },
+    params: Joi.object().keys({
+      cardId: Joi.string().alphanum().length(24),
+    }),
   }),
   deleteCard,
 );
@@ -41,9 +41,9 @@ router.put(
   '/:cardId/likes',
   auth,
   celebrate({
-    [Segments.PARAMS]: {
-      cardId: Joi.string().hex().length(24).required(),
-    },
+    params: Joi.object().keys({
+      cardId: Joi.string().alphanum().length(24),
+    }),
   }),
   likeCard,
 );
@@ -52,9 +52,9 @@ router.delete(
   '/:cardId/likes',
   auth,
   celebrate({
-    [Segments.PARAMS]: {
-      cardId: Joi.string().hex().length(24).required(),
-    },
+    params: Joi.object().keys({
+      cardId: Joi.string().alphanum().length(24),
+    }),
   }),
   dislikeCard,
 );
