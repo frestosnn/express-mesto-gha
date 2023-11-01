@@ -110,6 +110,11 @@ module.exports.updateUserAvatar = (req, res) => {
     })
 
     .catch((err) => {
+      if (err.name === "ValidationError") {
+        return res.status(400).send({
+          message: "Переданы некорректные данные при обновлении аватара. ",
+        });
+      }
       if (err.message === "InvalidId") {
         res
           .status(404)
