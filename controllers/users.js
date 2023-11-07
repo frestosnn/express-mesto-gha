@@ -166,7 +166,6 @@ module.exports.login = (req, res, next) => {
 
   return User.findOne({ email })
     .select('+password')
-    .orFail(new Error('InvalidData'))
     .then((user) => {
       bcrypt.compare(password, user.password, (err, matched) => {
         if (!matched) {
@@ -183,8 +182,8 @@ module.exports.login = (req, res, next) => {
       });
     })
     .catch((err) => {
-      if (err.message === 'InvalidData') {
-        return next(new UnauthorizedError('Такого пользователя не существует'));
+      if (err instanceof UnauthorizedError) {
+        return next(err);
       }
 
       return res.status(500).send({ message: 'На сервере произошла ошибка' });
