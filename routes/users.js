@@ -10,6 +10,8 @@ const {
 const auth = require("../middlewares/auth");
 
 router.get("/", auth, getUsers);
+router.get("/me", auth, getOwner);
+
 router.get(
   "/:userId",
   auth,
@@ -20,6 +22,7 @@ router.get(
   }),
   getUser
 );
+
 router.patch(
   "/me",
   auth,
@@ -42,7 +45,5 @@ router.patch(
   }),
   updateUserAvatar
 );
-
-router.get("/me", auth, getOwner);
 
 module.exports = router;

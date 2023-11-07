@@ -125,7 +125,7 @@ module.exports.updateUserAvatar = (req, res) => {
 };
 
 module.exports.getOwner = (req, res) => {
-  const currentUser = req.user._id;
+  const currentUser = req.user;
   if (currentUser) {
     return res.status(200).send({ currentUser });
   }
