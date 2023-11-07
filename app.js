@@ -61,11 +61,6 @@ app.use((req, res, next) => {
   next(err);
 });
 
-app.use((err, req, res, next) => {
-  res.status(err.status).send({ message: err.message });
-  next();
-});
-
 app.use(errorHandler);
 
 app.listen(PORT, () => {
