@@ -26,7 +26,7 @@ module.exports.createUser = (req, res) => {
       avatar,
     }))
     .then((user) => {
-      const updatedUser = { ...user };
+      const updatedUser = { ...user.toObject() };
       updatedUser.password = undefined;
       res.status(201).send(updatedUser);
     })
@@ -127,11 +127,23 @@ module.exports.updateUserAvatar = (req, res) => {
 };
 
 module.exports.getOwner = (req, res) => {
-  const currentUser = req.user;
-  if (currentUser) {
-    return res.status(200).send(currentUser);
-  }
-  return res.status(500).send({ message: 'На сервере произошла ошибка' });
+  const currentUser = req.user._id;
+  User.findById(currentUser)
+    .orFail(new Error('InvalidId'))
+    .then((user) => {
+      res.status(200).send(user);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Invalid ID' });
+      }
+      if (err.message === 'InvalidId') {
+        res
+          .status(404)
+          .send({ message: 'Пользователь по указанному _id не найден.' });
+      }
+      return res.status(500).send({ message: 'На сервере произошла ошибка' });
+    });
 };
 
 module.exports.login = (req, res) => {
