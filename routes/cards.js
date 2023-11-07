@@ -1,18 +1,18 @@
-const router = require("express").Router();
-const { celebrate, Joi } = require("celebrate");
+const router = require('express').Router();
+const { celebrate, Joi } = require('celebrate');
 const {
   getCards,
   createCard,
   deleteCard,
   likeCard,
   dislikeCard,
-} = require("../controllers/cards");
-const auth = require("../middlewares/auth");
+} = require('../controllers/cards');
+const auth = require('../middlewares/auth');
 
-router.get("/", auth, getCards);
+router.get('/', auth, getCards);
 
 router.post(
-  "/",
+  '/',
   auth,
   celebrate({
     body: Joi.object().keys({
@@ -23,40 +23,40 @@ router.post(
       createdAt: Joi.date(),
     }),
   }),
-  createCard
+  createCard,
 );
 
 router.delete(
-  "/:cardId",
+  '/:cardId',
   auth,
   celebrate({
     params: Joi.object().keys({
       cardId: Joi.string().alphanum().length(24),
     }),
   }),
-  deleteCard
+  deleteCard,
 );
 
 router.put(
-  "/:cardId/likes",
+  '/:cardId/likes',
   auth,
   celebrate({
     params: Joi.object().keys({
       cardId: Joi.string().alphanum().length(24),
     }),
   }),
-  likeCard
+  likeCard,
 );
 
 router.delete(
-  "/:cardId/likes",
+  '/:cardId/likes',
   auth,
   celebrate({
     params: Joi.object().keys({
       cardId: Joi.string().alphanum().length(24),
     }),
   }),
-  dislikeCard
+  dislikeCard,
 );
 
 module.exports = router;
