@@ -27,6 +27,7 @@ module.exports.createUser = (req, res) => {
         avatar,
       })
     )
+    .select("-password")
     .then((user) => res.status(201).send(user))
     .catch((err) => {
       if (err.name === "ValidationError") {
@@ -127,7 +128,7 @@ module.exports.updateUserAvatar = (req, res) => {
 module.exports.getOwner = (req, res) => {
   const currentUser = req.user;
   if (currentUser) {
-    return res.status(200).send({ currentUser });
+    return res.status(200).send(currentUser);
   }
   return res.status(500).send({ message: "На сервере произошла ошибка" });
 };
