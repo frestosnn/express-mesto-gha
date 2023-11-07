@@ -6,12 +6,15 @@ const ValidationError = require("../errors/validation-errors");
 
 const { JWT_SECRET = "secret" } = process.env;
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send(users))
-    .catch(() =>
-      res.status(500).send({ message: "На сервере произошла ошибка" })
-    );
+    .catch(() => {
+      if (err.name === "UnauthorizedError") {
+        return next(new UnauthorizedError("У  вас нет прав доступа"));
+      }
+      res.status(500).send({ message: "На сервере произошла ошибка" });
+    });
 };
 
 module.exports.createUser = (req, res, next) => {
