@@ -1,3 +1,4 @@
+const ValidationError = require('../errors/validation-errors');
 const Card = require('../models/card');
 
 module.exports.getCards = (req, res) => {
@@ -6,7 +7,7 @@ module.exports.getCards = (req, res) => {
     .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   const owner = req.user._id;
 
@@ -14,15 +15,17 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.status(201).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({
-          message: 'Переданы некорректные данные при создании карточки.',
-        });
+        return next(
+          new ValidationError(
+            'Переданы некорректные данные при создании карточки',
+          ),
+        );
       }
       return res.status(500).send({ message: 'На сервере произошла ошибка' });
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   const userId = req.user._id;
   const { cardId } = req.params;
 
@@ -36,9 +39,11 @@ module.exports.deleteCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return res.status(400).send({
-          message: 'Переданы некорректные данные при обновлении профиля.',
-        });
+        return next(
+          new ValidationError(
+            'Переданы некорректные данные при обновлении профиля.',
+          ),
+        );
       }
       if (err.message === 'InvalidId') {
         res
@@ -49,7 +54,7 @@ module.exports.deleteCard = (req, res) => {
     });
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -62,9 +67,11 @@ module.exports.likeCard = (req, res) => {
     .catch((err) => {
       console.log(err);
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return res.status(400).send({
-          message: 'Переданы некорректные данные для постановки лайка',
-        });
+        return next(
+          new ValidationError(
+            'Переданы некорректные данные для постановки лайка',
+          ),
+        );
       }
 
       if (err.message === 'InvalidId') {
@@ -76,7 +83,7 @@ module.exports.likeCard = (req, res) => {
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
 
@@ -90,10 +97,11 @@ module.exports.dislikeCard = (req, res) => {
     .catch((err) => {
       console.log(err);
       if (err.name === 'ValidationError' || err.name === 'CastError') {
-        return res
-          .status(400)
-          .send({ message: 'Переданы некорректные данные для снятия лайка' });
+        return next(
+          new ValidationError('Переданы некорректные данные для снятия лайка'),
+        );
       }
+
       if (err.message === 'InvalidId') {
         res
           .status(404)

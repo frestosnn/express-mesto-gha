@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const UnauthorizedError = require('../errors/unauthorized-errors');
+const ValidationError = require('../errors/validation-errors');
 
 const { JWT_SECRET = 'secret' } = process.env;
 
@@ -10,7 +12,7 @@ module.exports.getUsers = (req, res) => {
     .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -32,9 +34,11 @@ module.exports.createUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({
-          message: 'Переданы некорректные данные при создании пользователя.',
-        });
+        return next(
+          new ValidationError(
+            'Переданы некорректные данные при создании пользователя.',
+          ),
+        );
       }
       if (err.code === 11000) {
         return res
@@ -45,7 +49,7 @@ module.exports.createUser = (req, res) => {
     });
 };
 
-module.exports.getUser = (req, res) => {
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
     .orFail(new Error('InvalidId'))
     .then((user) => {
@@ -53,8 +57,9 @@ module.exports.getUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Invalid ID' });
+        return next(new ValidationError('Неправильный ID'));
       }
+
       if (err.message === 'InvalidId') {
         res
           .status(404)
@@ -64,7 +69,7 @@ module.exports.getUser = (req, res) => {
     });
 };
 
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   const owner = req.user._id;
 
   User.findByIdAndUpdate(
@@ -82,10 +87,13 @@ module.exports.updateUser = (req, res) => {
 
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({
-          message: 'Переданы некорректные данные при обновлении профиля.',
-        });
+        next(
+          new ValidationError(
+            'Переданы некорректные данные при обновлении профиля.',
+          ),
+        );
       }
+
       if (err.message === 'InvalidId') {
         res
           .status(404)
@@ -95,7 +103,7 @@ module.exports.updateUser = (req, res) => {
     });
 };
 
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   const owner = req.user._id;
 
   User.findByIdAndUpdate(
@@ -113,10 +121,13 @@ module.exports.updateUserAvatar = (req, res) => {
 
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({
-          message: 'Переданы некорректные данные при обновлении аватара. ',
-        });
+        return next(
+          new ValidationError(
+            'Переданы некорректные данные при обновлении аватара.',
+          ),
+        );
       }
+
       if (err.message === 'InvalidId') {
         res
           .status(404)
@@ -126,7 +137,7 @@ module.exports.updateUserAvatar = (req, res) => {
     });
 };
 
-module.exports.getOwner = (req, res) => {
+module.exports.getOwner = (req, res, next) => {
   const currentUser = req.user._id;
   User.findById(currentUser)
     .orFail(new Error('InvalidId'))
@@ -135,7 +146,7 @@ module.exports.getOwner = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(400).send({ message: 'Invalid ID' });
+        return next(new ValidationError('Неправильный ID'));
       }
       if (err.message === 'InvalidId') {
         res
@@ -146,11 +157,11 @@ module.exports.getOwner = (req, res) => {
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).send({ message: 'Email или пароль не заполнены' });
+    return next(new ValidationError('Email или пароль не заполнены'));
   }
 
   return User.findOne({ email })
@@ -159,9 +170,7 @@ module.exports.login = (req, res) => {
     .then((user) => {
       bcrypt.compare(password, user.password, (err, matched) => {
         if (!matched) {
-          return res
-            .status(401)
-            .send({ message: 'Пароль или email не верный' });
+          return next(new UnauthorizedError('Пароль или email не верный'));
         }
 
         // генерируем токен пользователя
@@ -175,9 +184,7 @@ module.exports.login = (req, res) => {
     })
     .catch((err) => {
       if (err.message === 'InvalidData') {
-        return res
-          .status(401)
-          .send({ message: 'Такого пользователя не существует' });
+        return next(new UnauthorizedError('Такого пользователя не существует'));
       }
 
       return res.status(500).send({ message: 'На сервере произошла ошибка' });

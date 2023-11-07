@@ -8,6 +8,7 @@ const { createUser, login } = require('./controllers/users');
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 require('dotenv').config();
+const errorHandler = require('./middlewares/error-handler');
 
 const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1:27017/mestodb' } = process.env;
 const app = express();
@@ -64,6 +65,8 @@ app.use((err, req, res, next) => {
   res.status(err.status).send({ message: err.message });
   next();
 });
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`App is listening ${PORT}`);
