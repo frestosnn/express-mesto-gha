@@ -29,7 +29,7 @@ module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(cardId)
     .orFail(new Error('InvalidId'))
     .then((card) => {
-      if (card.owner._id !== userId) {
+      if (card.owner.toString() !== userId.toString()) {
         return res.status(403).send({ message: 'Отсутствуют права' });
       }
       return res.status(200).send(card);
