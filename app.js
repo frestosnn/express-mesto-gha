@@ -55,13 +55,13 @@ app.use('/cards', cardRouter);
 // обработка ошибок celebrate
 app.use(errors());
 
+app.use(errorHandler);
+
 app.use((req, res, next) => {
   const err = new Error('Not Found: Маршрут не найден');
   err.status = 404;
   next(err);
 });
-
-app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`App is listening ${PORT}`);
