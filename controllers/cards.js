@@ -32,6 +32,7 @@ module.exports.deleteCard = (req, res, next) => {
 
   // сначала ищем карточку и владельца
   Card.findById(cardId)
+    .orFail(new PathError())
     .then((card) => {
       if (card.owner.toString() !== userId.toString()) {
         return res.status(403).send({ message: 'Отсутствуют права' });
@@ -39,19 +40,10 @@ module.exports.deleteCard = (req, res, next) => {
 
       // если нашли, то удаляем
       return Card.findByIdAndRemove(cardId)
-        .orFail(new PathError())
         .then(() => {
           res.status(200).send(card);
         })
-        .catch((err) => {
-          if (err instanceof PathError) {
-            return next(
-              new PathError('Карточка по указанному _id не найдена.'),
-            );
-          }
-
-          return next(err);
-        });
+        .catch((err) => next(err));
     })
 
     .catch((err) => {
@@ -61,6 +53,10 @@ module.exports.deleteCard = (req, res, next) => {
             'Переданы некорректные данные для удаления карточки.',
           ),
         );
+      }
+
+      if (err instanceof PathError) {
+        return next(new PathError('Карточка по указанному _id не найдена.'));
       }
 
       return next(err);
