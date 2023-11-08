@@ -31,6 +31,7 @@ module.exports.deleteCard = (req, res, next) => {
   const { cardId } = req.params;
 
   Card.findByIdAndRemove(cardId)
+    .orFail(new PathError())
     .then((card) => {
       if (card.owner.toString() !== userId.toString()) {
         return res.status(403).send({ message: "Отсутствуют права" });
@@ -60,6 +61,7 @@ module.exports.likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true }
   )
+    .orFail(new PathError())
     .then((card) => {
       res.status(200).send(card);
     })
@@ -86,6 +88,7 @@ module.exports.dislikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true }
   )
+    .orFail(new PathError())
     .then((card) => {
       res.status(200).send(card);
     })
