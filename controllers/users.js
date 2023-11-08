@@ -3,13 +3,14 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const UnauthorizedError = require('../errors/unauthorized-errors');
 const ValidationError = require('../errors/validation-errors');
+const PathError = require('../errors/path-errors');
 
 const { JWT_SECRET = 'secret' } = process.env;
 
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.status(200).send(users))
-    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
+    .catch((err) => next(err));
 };
 
 module.exports.createUser = (req, res, next) => {
@@ -32,6 +33,7 @@ module.exports.createUser = (req, res, next) => {
       updatedUser.password = undefined;
       res.status(201).send(updatedUser);
     })
+
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return next(
@@ -40,18 +42,18 @@ module.exports.createUser = (req, res, next) => {
           ),
         );
       }
+
       if (err.code === 11000) {
         return res
           .status(409)
           .send({ message: 'Такой пользователь уже создан' });
       }
-      return res.status(500).send({ message: 'На сервере произошла ошибка' });
+      return next(err);
     });
 };
 
 module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
-    .orFail(new Error('InvalidId'))
     .then((user) => {
       res.status(200).send(user);
     })
@@ -60,12 +62,10 @@ module.exports.getUser = (req, res, next) => {
         return next(new ValidationError('Неправильный ID'));
       }
 
-      if (err.message === 'InvalidId') {
-        res
-          .status(404)
-          .send({ message: 'Пользователь по указанному _id не найден.' });
+      if (err instanceof PathError) {
+        return next(new PathError('Пользователь по указанному _id не найден.'));
       }
-      return res.status(500).send({ message: 'На сервере произошла ошибка' });
+      return next(err);
     });
 };
 
@@ -80,7 +80,7 @@ module.exports.updateUser = (req, res, next) => {
       runValidators: true,
     },
   )
-    .orFail(new Error('InvalidId'))
+
     .then((user) => {
       res.status(200).send(user);
     })
@@ -94,12 +94,10 @@ module.exports.updateUser = (req, res, next) => {
         );
       }
 
-      if (err.message === 'InvalidId') {
-        res
-          .status(404)
-          .send({ message: 'Пользователь по указанному _id не найден.' });
+      if (err instanceof PathError) {
+        return next(new PathError('Пользователь по указанному _id не найден.'));
       }
-      return res.status(500).send({ message: 'На сервере произошла ошибка' });
+      return next(err);
     });
 };
 
@@ -114,7 +112,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
       runValidators: true,
     },
   )
-    .orFail(new Error('InvalidId'))
+
     .then((user) => {
       res.status(200).send(user);
     })
@@ -128,41 +126,33 @@ module.exports.updateUserAvatar = (req, res, next) => {
         );
       }
 
-      if (err.message === 'InvalidId') {
-        res
-          .status(404)
-          .send({ message: 'Пользователь по указанному _id не найден.' });
+      if (err instanceof PathError) {
+        return next(new PathError('Пользователь по указанному _id не найден.'));
       }
-      return res.status(500).send({ message: 'На сервере произошла ошибка' });
+      return next(err);
     });
 };
 
 module.exports.getOwner = (req, res, next) => {
   const currentUser = req.user._id;
   User.findById(currentUser)
-    .orFail(new Error('InvalidId'))
+
     .then((user) => {
       res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError') {
         return next(new ValidationError('Неправильный ID'));
       }
-      if (err.message === 'InvalidId') {
-        res
-          .status(404)
-          .send({ message: 'Пользователь по указанному _id не найден.' });
+      if (err instanceof PathError) {
+        return next(PathError('Пользователь по указанному _id не найден.'));
       }
-      return res.status(500).send({ message: 'На сервере произошла ошибка' });
+      return next(err);
     });
 };
 
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
-
-  if (!email || !password) {
-    return next(new ValidationError('Email или пароль не заполнены'));
-  }
 
   return User.findOne({ email })
     .select('+password')
@@ -188,5 +178,5 @@ module.exports.login = (req, res, next) => {
         return res.status(200).send({ token });
       });
     })
-    .catch(() => res.status(500).send({ message: 'На сервере произошла ошибка' }));
+    .catch((err) => next(err));
 };
