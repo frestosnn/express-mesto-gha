@@ -1,5 +1,5 @@
-const PathError = require("../errors/path-errors");
 const ValidationError = require("../errors/validation-errors");
+const PathError = require("../errors/path-errors");
 const Card = require("../models/card");
 
 module.exports.getCards = (req, res, next) => {
@@ -38,16 +38,16 @@ module.exports.deleteCard = (req, res, next) => {
       return res.status(200).send(card);
     })
     .catch((err) => {
-      if (err instanceof PathError) {
-        return next(new PathError("Карточка по указанному _id не найдена."));
-      }
-
       if (err.name === "CastError") {
         return next(
           new ValidationError(
             "Переданы некорректные данные при обновлении профиля."
           )
         );
+      }
+
+      if (err instanceof PathError) {
+        return next(new PathError("Карточка по указанному _id не найдена."));
       }
 
       return next(err);
