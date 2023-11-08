@@ -1,11 +1,11 @@
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const User = require("../models/user");
-const UnauthorizedError = require("../errors/unauthorized-errors");
-const ValidationError = require("../errors/validation-errors");
-const PathError = require("../errors/path-errors");
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const User = require('../models/user');
+const UnauthorizedError = require('../errors/unauthorized-errors');
+const ValidationError = require('../errors/validation-errors');
+const PathError = require('../errors/path-errors');
 
-const { JWT_SECRET = "secret" } = process.env;
+const { JWT_SECRET = 'secret' } = process.env;
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -14,20 +14,20 @@ module.exports.getUsers = (req, res, next) => {
 };
 
 module.exports.createUser = (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
 
   // хэшируем пароль
   bcrypt
     .hash(password, 10)
-    .then((hash) =>
-      User.create({
-        email,
-        password: hash,
-        name,
-        about,
-        avatar,
-      })
-    )
+    .then((hash) => User.create({
+      email,
+      password: hash,
+      name,
+      about,
+      avatar,
+    }))
     .then((user) => {
       const updatedUser = { ...user.toObject() };
       updatedUser.password = undefined;
@@ -35,18 +35,18 @@ module.exports.createUser = (req, res, next) => {
     })
 
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return next(
           new ValidationError(
-            "Переданы некорректные данные при создании пользователя."
-          )
+            'Переданы некорректные данные при создании пользователя.',
+          ),
         );
       }
 
       if (err.code === 11000) {
         return res
           .status(409)
-          .send({ message: "Такой пользователь уже создан" });
+          .send({ message: 'Такой пользователь уже создан' });
       }
       return next(err);
     });
@@ -59,12 +59,12 @@ module.exports.getUser = (req, res, next) => {
       res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.name === "CastError") {
-        return next(new ValidationError("Неправильный ID"));
+      if (err.name === 'CastError') {
+        return next(new ValidationError('Неправильный ID'));
       }
 
       if (err instanceof PathError) {
-        return next(new PathError("Пользователь по указанному _id не найден."));
+        return next(new PathError('Пользователь по указанному _id не найден.'));
       }
       return next(err);
     });
@@ -79,7 +79,7 @@ module.exports.updateUser = (req, res, next) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   )
     .orFail(new PathError())
 
@@ -88,16 +88,16 @@ module.exports.updateUser = (req, res, next) => {
     })
 
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         next(
           new ValidationError(
-            "Переданы некорректные данные при обновлении профиля."
-          )
+            'Переданы некорректные данные при обновлении профиля.',
+          ),
         );
       }
 
       if (err instanceof PathError) {
-        return next(new PathError("Пользователь по указанному _id не найден."));
+        return next(new PathError('Пользователь по указанному _id не найден.'));
       }
       return next(err);
     });
@@ -112,7 +112,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
     {
       new: true,
       runValidators: true,
-    }
+    },
   )
     .orFail(new PathError())
 
@@ -121,16 +121,16 @@ module.exports.updateUserAvatar = (req, res, next) => {
     })
 
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return next(
           new ValidationError(
-            "Переданы некорректные данные при обновлении аватара."
-          )
+            'Переданы некорректные данные при обновлении аватара.',
+          ),
         );
       }
 
       if (err instanceof PathError) {
-        return next(new PathError("Пользователь по указанному _id не найден."));
+        return next(new PathError('Пользователь по указанному _id не найден.'));
       }
       return next(err);
     });
@@ -145,11 +145,11 @@ module.exports.getOwner = (req, res, next) => {
       res.status(200).send(user);
     })
     .catch((err) => {
-      if (err.name === "ValidationError") {
-        return next(new ValidationError("Неправильный ID"));
+      if (err.name === 'ValidationError') {
+        return next(new ValidationError('Неправильный ID'));
       }
       if (err instanceof PathError) {
-        return next(PathError("Пользователь по указанному _id не найден."));
+        return next(PathError('Пользователь по указанному _id не найден.'));
       }
       return next(err);
     });
@@ -159,10 +159,10 @@ module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findOne({ email })
-    .select("+password")
+    .select('+password')
     .then((user) => {
       if (!user) {
-        return next(new UnauthorizedError("Такого пользователя не существует"));
+        return next(new UnauthorizedError('Такого пользователя не существует'));
       }
       return user;
     })
@@ -170,12 +170,12 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       bcrypt.compare(password, user.password, (err, matched) => {
         if (!matched) {
-          return next(new UnauthorizedError("Пароль или email не верный"));
+          return next(new UnauthorizedError('Пароль или email не верный'));
         }
 
         // генерируем токен пользователя
         const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-          expiresIn: "7d",
+          expiresIn: '7d',
         });
 
         // отдаем пользователю токен
