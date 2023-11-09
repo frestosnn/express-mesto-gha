@@ -16,7 +16,6 @@ router.post(
   auth,
   celebrate({
     body: Joi.object().keys({
-      likes: Joi.array(),
       name: Joi.string().required().min(2).max(30),
       link: Joi.string()
         .uri()
@@ -24,8 +23,6 @@ router.post(
         .pattern(
           /(https?:\/\/)(w{3}\.)?(((\d{1,3}\.){3}\d{1,3})|((\w-?)+\.(ru|com)))(:\d{2,5})?((\/.+)+)?\/?#?/,
         ),
-      owner: Joi.object(),
-      createdAt: Joi.date(),
     }),
   }),
   createCard,

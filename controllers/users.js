@@ -54,7 +54,7 @@ module.exports.createUser = (req, res, next) => {
 
 module.exports.getUser = (req, res, next) => {
   User.findById(req.params.userId)
-    .orFail(new PathError())
+    .orFail(new PathError('Пользователь по указанному _id не найден.'))
     .then((user) => {
       res.status(200).send(user);
     })
@@ -63,9 +63,6 @@ module.exports.getUser = (req, res, next) => {
         return next(new ValidationError('Неправильный ID'));
       }
 
-      if (err instanceof PathError) {
-        return next(new PathError('Пользователь по указанному _id не найден.'));
-      }
       return next(err);
     });
 };
@@ -81,7 +78,7 @@ module.exports.updateUser = (req, res, next) => {
       runValidators: true,
     },
   )
-    .orFail(new PathError())
+    .orFail(new PathError('Пользователь по указанному _id не найден.'))
 
     .then((user) => {
       res.status(200).send(user);
@@ -96,9 +93,6 @@ module.exports.updateUser = (req, res, next) => {
         );
       }
 
-      if (err instanceof PathError) {
-        return next(new PathError('Пользователь по указанному _id не найден.'));
-      }
       return next(err);
     });
 };
@@ -114,7 +108,7 @@ module.exports.updateUserAvatar = (req, res, next) => {
       runValidators: true,
     },
   )
-    .orFail(new PathError())
+    .orFail(new PathError('Пользователь по указанному _id не найден.'))
 
     .then((user) => {
       res.status(200).send(user);
@@ -129,9 +123,6 @@ module.exports.updateUserAvatar = (req, res, next) => {
         );
       }
 
-      if (err instanceof PathError) {
-        return next(new PathError('Пользователь по указанному _id не найден.'));
-      }
       return next(err);
     });
 };
@@ -139,20 +130,12 @@ module.exports.updateUserAvatar = (req, res, next) => {
 module.exports.getOwner = (req, res, next) => {
   const currentUser = req.user._id;
   User.findById(currentUser)
-    .orFail(new PathError())
+    .orFail(new PathError('Пользователь по указанному _id не найден.'))
 
     .then((user) => {
       res.status(200).send(user);
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return next(new ValidationError('Неправильный ID'));
-      }
-      if (err instanceof PathError) {
-        return next(PathError('Пользователь по указанному _id не найден.'));
-      }
-      return next(err);
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.login = (req, res, next) => {

@@ -32,7 +32,7 @@ module.exports.deleteCard = (req, res, next) => {
 
   // сначала ищем карточку и владельца
   Card.findById(cardId)
-    .orFail(new PathError())
+    .orFail(new PathError('Карточка по указанному _id не найдена.'))
     .then((card) => {
       if (card.owner.toString() !== userId.toString()) {
         return res.status(403).send({ message: 'Отсутствуют права' });
@@ -55,10 +55,6 @@ module.exports.deleteCard = (req, res, next) => {
         );
       }
 
-      if (err instanceof PathError) {
-        return next(new PathError('Карточка по указанному _id не найдена.'));
-      }
-
       return next(err);
     });
 };
@@ -69,7 +65,7 @@ module.exports.likeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .orFail(new PathError())
+    .orFail(new PathError('Карточка по указанному _id не найдена.'))
     .then((card) => {
       res.status(200).send(card);
     })
@@ -82,9 +78,6 @@ module.exports.likeCard = (req, res, next) => {
         );
       }
 
-      if (err instanceof PathError) {
-        return next(new PathError('Карточка по указанному _id не найдена.'));
-      }
       return next(err);
     });
 };
@@ -96,7 +89,7 @@ module.exports.dislikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .orFail(new PathError())
+    .orFail(new PathError('Карточка по указанному _id не найдена.'))
     .then((card) => {
       res.status(200).send(card);
     })
@@ -105,10 +98,6 @@ module.exports.dislikeCard = (req, res, next) => {
         return next(
           new ValidationError('Переданы некорректные данные для снятия лайка'),
         );
-      }
-
-      if (err instanceof PathError) {
-        return next(new PathError('Карточка по указанному _id не найдена.'));
       }
 
       return next(err);
