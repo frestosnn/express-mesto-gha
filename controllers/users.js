@@ -44,7 +44,7 @@ module.exports.createUser = (req, res, next) => {
         );
       }
 
-      if (err.statusCode === 11000) {
+      if (err.code === 11000) {
         return next(new BdError('Такой пользователь уже создан'));
       }
 
