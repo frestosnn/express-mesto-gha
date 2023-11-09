@@ -1,6 +1,7 @@
 const ValidationError = require('../errors/validation-errors');
 const PathError = require('../errors/path-errors');
 const Card = require('../models/card');
+const RightsError = require('../errors/rights-errors');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -26,6 +27,7 @@ module.exports.createCard = (req, res, next) => {
     });
 };
 
+// в постмане карточки другого пользователя не удаляются + в автотестах тоже
 module.exports.deleteCard = (req, res, next) => {
   const userId = req.user._id;
   const { cardId } = req.params;
@@ -35,11 +37,11 @@ module.exports.deleteCard = (req, res, next) => {
     .orFail(new PathError('Карточка по указанному _id не найдена.'))
     .then((card) => {
       if (card.owner.toString() !== userId.toString()) {
-        return res.status(403).send({ message: 'Отсутствуют права' });
+        return next(new RightsError('Отсутствуют права'));
       }
 
       // если нашли, то удаляем
-      return Card.findByIdAndRemove(cardId)
+      return Card.deleteOne(cardId)
         .then(() => {
           res.status(200).send(card);
         })
