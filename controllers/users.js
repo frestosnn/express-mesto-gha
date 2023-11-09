@@ -4,6 +4,7 @@ const User = require('../models/user');
 const UnauthorizedError = require('../errors/unauthorized-errors');
 const ValidationError = require('../errors/validation-errors');
 const PathError = require('../errors/path-errors');
+const BdError = require('../errors/bd-errors');
 
 const { JWT_SECRET = 'secret' } = process.env;
 
@@ -43,10 +44,8 @@ module.exports.createUser = (req, res, next) => {
         );
       }
 
-      if (err.code === 11000) {
-        return res
-          .status(409)
-          .send({ message: 'Такой пользователь уже создан' });
+      if (err.statusCode === 11000) {
+        return next(new BdError('Такой пользователь уже создан'));
       }
       return next(err);
     });
